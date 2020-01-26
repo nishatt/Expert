@@ -17,7 +17,7 @@ exports.mentorlist = (req, res) => {
     $match: {}
   }
   if (filterBy) {
-    filterQuery.$match[filterBy] = filterValue
+    filterQuery.$match[filterBy] = { $in: filterValue }
   }
   let searchq = (search != '') ? { $match: { "fullname": { $regex: new RegExp(search, "i") } } } : { $match: { "fullname": { $ne: '' } } }
   Users.aggregate([
