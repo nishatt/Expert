@@ -11,6 +11,11 @@ exports.mentorlist = (req, res) => {
   let sortasc = sortbyasc(sort);
   let sortby = sortbylabel(sort)
   let search = req.body.search;
+  //- for filter request param e.g
+  /* filterValue = ['Google']
+     filterLabel = 'company'
+  */
+
   let filterValue = req.body.filterValue;
   let filterBy = filterValue ? filterByLabel(req.body.filterLabel) : ""
   let filterQuery = {
