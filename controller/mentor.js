@@ -15,14 +15,11 @@ exports.mentorlist = (req, res) => {
   /* filterValue = ['Google']
      filterLabel = 'company'
   */
-
   let filterValue = req.body.filterValue;
   let filterBy = filterValue ? filterByLabel(req.body.filterLabel) : ""
-  let filterQuery = {
-    $match: {}
-  }
+  let filterMatch = {}
   if (filterBy) {
-    filterQuery.$match[filterBy] = { $in: filterValue }
+    filterMatch[filterBy] = { $in: filterValue }
   }
   let searchq = (search != '') ? { $match: { "fullname": { $regex: new RegExp(search, "i") } } } : { $match: { "fullname": { $ne: '' } } }
   Users.aggregate([
@@ -181,7 +178,9 @@ exports.mentorlist = (req, res) => {
         as: 'profession'
       }
     },
-    filterQuery,
+    {
+      $match: filterMatch
+    },
     {
       $addFields: {
         "end": "$education.end"
