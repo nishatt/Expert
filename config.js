@@ -1,6 +1,7 @@
+require('dotenv').config()
 module.exports = {
-  MONGO_DB: 'dummy',
-  MONGO_USER: 'dummy',
-  MONGO_PASSWORD: 'dummy',
-  MONGO_HOST: 'dummy'
+  MONGO_DB: process.env.MONGO_DB,
+  MONGO_USER: process.env.MONGO_USER,
+  MONGO_PASSWORD: process.env.MONGO_PASSWORD,
+  MONGO_HOST: process.env.MONGO_HOST
 }
