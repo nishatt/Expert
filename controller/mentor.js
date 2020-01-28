@@ -21,10 +21,21 @@ exports.mentorlist = (req, res) => {
   let filter = req.body.filter
   let filterMatch = [{}] //- passing empty array object if there is no value in filter
   if (filter) filterObject(filter)
-
-  let searchq = (search != '') ? { $match: { "fullname": { $regex: new RegExp(search, "i") } } } : { $match: { "fullname": { $ne: '' } } }
+  //- text search 
+  //- e.g  {searchText: 'TCS'}
+  let searchQuery = {}
+  if (req.body.searchText) {
+    searchQuery['$or'] = []
+    searchQuery['$or'].push({ "fullname": { $regex: new RegExp(req.body.searchText, "i") } })
+    searchQuery['$or'].push({ "profession.company.name": { $regex: new RegExp(req.body.searchText, "i") } })
+    searchQuery['$or'].push({ "profession.designation.name": { $regex: new RegExp(req.body.searchText, "i") } })
+    searchQuery['$or'].push({ "profession.department.name": { $regex: new RegExp(req.body.searchText, "i") } })
+    searchQuery['$or'].push({ "profession.sector.name": { $regex: new RegExp(req.body.searchText, "i") } })
+    searchQuery['$or'].push({ "education.college_name.name": { $regex: new RegExp(req.body.searchText, "i") } })
+  }
+  // let searchq = (search != '') ? { $match: { "fullname": { $regex: new RegExp(search, "i") } } } : { $match: { "fullname": { $ne: '' } } }
   Users.aggregate([
-    searchq,
+    // searchq,
     { $match: { usertype: 1, status: 1 } },
     { $project: { email: 1, fullname: 1, countryid: 1, stateid: 1, cityid: 1, photo: 1 } },
     {
@@ -179,6 +190,7 @@ exports.mentorlist = (req, res) => {
         as: 'profession'
       }
     },
+    { $match: searchQuery },
     {
       $match: {
         $or: filterMatch
