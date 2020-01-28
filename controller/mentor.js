@@ -19,7 +19,7 @@ exports.mentorlist = (req, res) => {
    }
    */
   let filter = req.body.filter
-  let filterMatch = [{}] //- passing array of empty object if there is no value in filter
+  let filterMatch = [{}] //- passing empty array object if there is no value in filter
   if (filter) filterObject(filter)
 
   let searchq = (search != '') ? { $match: { "fullname": { $regex: new RegExp(search, "i") } } } : { $match: { "fullname": { $ne: '' } } }
