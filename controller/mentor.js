@@ -1,7 +1,8 @@
 const Users = require('../model/user/users');
 // const globalConfig = require('../../../config/config');
 // const JWT = require('../../../config/jwt_verify');
-
+const mongoose = require('mongoose')
+const ObjectId = mongoose.Types.ObjectId
 exports.mentorlist = (req, res) => {
   // const userid = JWT(req, res);
   // if (userid != null) {
@@ -12,15 +13,15 @@ exports.mentorlist = (req, res) => {
   let sortby = sortbylabel(sort)
   let search = req.body.search;
   //- for filter request param e.g
-  /* filterValue = ['Google']
-     filterLabel = 'company'
-  */
-  let filterValue = req.body.filterValue;
-  let filterBy = filterValue ? filterByLabel(req.body.filterLabel) : ""
-  let filterMatch = {}
-  if (filterBy) {
-    filterMatch[filterBy] = { $in: filterValue }
-  }
+  /* "filter":{
+     "company": ["5e2980a7f7af413877158ffd", "5e2980a7f7af4138771590a4" ],
+     "department":["5e298147b4124638dff79b28"]
+   }
+   */
+  let filter = req.body.filter
+  let filterMatch = [{}] //- passing array of empty object if there is no value in filter
+  if (filter) filterObject(filter)
+
   let searchq = (search != '') ? { $match: { "fullname": { $regex: new RegExp(search, "i") } } } : { $match: { "fullname": { $ne: '' } } }
   Users.aggregate([
     searchq,
@@ -136,7 +137,7 @@ exports.mentorlist = (req, res) => {
               let: { childid: "$company" },
               pipeline: [
                 { $match: { $expr: { $eq: ["$_id", "$$childid"] } } },
-                { $project: { name: 1, _id: 0 } },
+                { $project: { name: 1 } },
               ],
               as: "company"
             }
@@ -147,7 +148,7 @@ exports.mentorlist = (req, res) => {
               let: { childid: "$designation" },
               pipeline: [
                 { $match: { $expr: { $eq: ["$_id", "$$childid"] } } },
-                { $project: { name: 1, _id: 0 } },
+                { $project: { name: 1 } },
               ],
               as: "designation"
             }
@@ -158,7 +159,7 @@ exports.mentorlist = (req, res) => {
               let: { childid: "$sector" },
               pipeline: [
                 { $match: { $expr: { $eq: ["$_id", "$$childid"] } } },
-                { $project: { name: 1, _id: 0 } },
+                { $project: { name: 1 } },
               ],
               as: "sector"
             }
@@ -169,7 +170,7 @@ exports.mentorlist = (req, res) => {
               let: { childid: "$department" },
               pipeline: [
                 { $match: { $expr: { $eq: ["$_id", "$$childid"] } } },
-                { $project: { name: 1, _id: 0 } },
+                { $project: { name: 1 } },
               ],
               as: "department"
             }
@@ -179,7 +180,9 @@ exports.mentorlist = (req, res) => {
       }
     },
     {
-      $match: filterMatch
+      $match: {
+        $or: filterMatch
+      }
     },
     {
       $addFields: {
@@ -263,21 +266,42 @@ function sortbylabel(sort) {
   }
 }
 // add more filter on the basis of label
-function filterByLabel(label) {
-  switch (label) {
-    case "comapny":
-      return 'profession.company.name'
-      break;
-    case "sector":
-      return 'profession.sector.name'
-      break;
-    case "designation":
-      return 'profession.designation.name'
-      break;
-    case "department":
-      return 'profession.department.name'
-      break;
-    default:
-      return 'profession.company.name'
+function filterObject(filter) {
+  filterMatch = []
+  for (let key in filter) {
+    if (key == 'company') {
+      let mapArray = filter[key].map(val => ObjectId(val))
+      filterMatch.push({ 'profession.company._id': { $in: mapArray } })
+    }
+    if (key == 'sector') {
+      let mapArray = filter[key].map(val => ObjectId(val))
+      filterMatch.push({ 'profession.sector._id': { $in: mapArray } })
+    }
+    if (key == 'designation') {
+      let mapArray = filter[key].map(val => ObjectId(val))
+      filterMatch.push({ 'profession.designation._id': { $in: mapArray } })
+    }
+    if (key == 'department') {
+      let mapArray = filter[key].map(val => ObjectId(val))
+      filterMatch.push({ 'profession.department._id': { $in: mapArray } })
+    }
   }
 }
+// function filterByLabel(label) {
+//   switch (label) {
+//     case "comapny":
+//       return 'profession.company.name'
+//       break;
+//     case "sector":
+//       return 'profession.sector.name'
+//       break;
+//     case "designation":
+//       return 'profession.designation.name'
+//       break;
+//     case "department":
+//       return 'profession.department.name'
+//       break;
+//     default:
+//       return 'profession.company.name'
+//   }
+// }
