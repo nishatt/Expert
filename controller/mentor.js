@@ -1,4 +1,8 @@
 const Users = require('../model/user/users');
+const MentorVideo = require('../model/mentor/mentor_videos');
+const MentorDetails = require('../model/mentor/mentor_details');
+
+
 // const globalConfig = require('../../../config/config');
 // const JWT = require('../../../config/jwt_verify');
 const mongoose = require('mongoose')
@@ -226,7 +230,50 @@ exports.mentorlist = (req, res) => {
   // }
 }
 
+/*
+  request eg.
+    {
+      mentorId: "5e298d85bacbc44045008c81"
+    }
+*/
+exports.mentorVideoList = async (req, res) => {
+  let mentorVideo = await MentorVideo.find({ userid: ObjectId(req.body.mentorId) })
+    .populate({
+      path: 'userid', select: 'userid',
+      populate: {
+        path: 'userid', select: 'fullname photo email'
+      }
+    })
+  if (!mentorVideo) {
+    return res.json({
+      status: 401
+    })
+  }
+  let response = mentorVideo.map(video => {
+    return {
+      fullname: video.userid.userid.fullname,
+      email: video.userid.userid.email,
+      photo: video.userid.userid.photo,
+      userid: video.userid.userid._id,
+      mentorid: video.userid._id,
+      type: video.type,
+      question: video.question,
+      answer: video.answer,
+      link: video.link,
+      question_type: video.question_type,
+      status: video.status
+    }
+  })
+  return res.json({
+    status: true,
+    data: response
+    // err: err
+  })
+}
 
+exports.mentorProfile = async (req, res) => {
+
+}
 function sortbyasc(sort) {
   switch (sort) {
     case "1":
