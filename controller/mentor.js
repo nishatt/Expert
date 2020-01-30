@@ -239,10 +239,7 @@ exports.mentorlist = (req, res) => {
 exports.mentorVideoList = async (req, res) => {
   let mentorVideo = await MentorVideo.find({ userid: ObjectId(req.body.mentorId) })
     .populate({
-      path: 'userid', select: 'userid',
-      populate: {
-        path: 'userid', select: 'fullname photo email'
-      }
+      path: 'userid', select: 'fullname photo email'
     })
   if (!mentorVideo) {
     return res.json({
@@ -251,17 +248,17 @@ exports.mentorVideoList = async (req, res) => {
   }
   let response = mentorVideo.map(video => {
     return {
-      fullname: video.userid.userid.fullname,
-      email: video.userid.userid.email,
-      photo: video.userid.userid.photo,
-      userid: video.userid.userid._id,
-      mentorid: video.userid._id,
+      fullname: video.userid.fullname,
+      email: video.userid.email,
+      photo: video.userid.photo,
+      userid: video.userid._id,
       type: video.type,
       question: video.question,
       answer: video.answer,
       link: video.link,
       question_type: video.question_type,
-      status: video.status
+      status: video.status,
+      _id: video._id
     }
   })
   return res.json({

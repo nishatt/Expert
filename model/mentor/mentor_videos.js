@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let mentorVideos = new Schema({
-  // userid: { type: Schema.Types.ObjectId, ref: 'Users' },
-  userid: { type: Schema.Types.ObjectId, ref: 'mentor_details' },
+  userid: { type: Schema.Types.ObjectId, ref: 'Users' },
   type: { type: Number },
   question: { type: String },
   answer: { type: String },
